@@ -175,7 +175,7 @@ def comeOutRoll():
     
     print("ComeOutRoll")
     addBets()
-    rollDice()
+    craps_methods.rollDice()
     payBets()
     
     if dice == 7 or dice == 11 or dice == 2 or dice == 3 or dice == 12 :
@@ -196,7 +196,7 @@ def pointRoll():
     while stillRolling == 1:
         #print("rolling for point: ", currentPoint)
         addBets()
-        rollDice()
+        craps_methods.rollDice()
         payBets()
         
         #conditions
@@ -237,10 +237,10 @@ def addBets():
             
             #bet only on the 1st roll after point
             if rollCount == 1:
-                addBet("field", 200)
-                addBet("place5",200)
-                addBet("place6",220)
-                addBet("place8",220)
+                addBet("field", 25)
+                addBet("place5",25)
+                addBet("place6",30)
+                addBet("place8",30)
 
                 
                 doNothing = 0
@@ -249,10 +249,10 @@ def addBets():
                 takeDown("place5")
                 takeDown("place6")
                 takeDown("place8")
-                addBet("field", 50)
-                addBet("place5",50)
-                addBet("place6",50)
-                addBet("place8",50)
+                addBet("field", 5)
+                addBet("place5",5)
+                addBet("place6",6)
+                addBet("place8",6)
                     
             
     
