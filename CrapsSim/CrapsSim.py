@@ -170,7 +170,7 @@ def payBets():
     
 def comeOutRoll():
     #TODO roll dice, eval for win/loss/point - not going to program pass line at this time (iron cross)
-    global currentPoint, rollState
+    global currentPoint, rollState, dice
     rollState=0
     
     print("ComeOutRoll")
