@@ -135,25 +135,25 @@ def payBets():
         
         #Check for Place Wins, will come down automatically with 7-out
         if currentBets[i] == "place4" and dice == 4:
-                bankRoll = bankRoll + currentBets[i+1] * .8
-                print("Place 4 bet pays 9/5 ", currentBets[i+1] * .8, "bankRoll:", bankRoll)
+                bankRoll = bankRoll + currentBets[i+1] * 1.8
+                print("Place 4 bet pays 9/5 ", currentBets[i+1] * 1.8, "bankRoll:", bankRoll)
         if currentBets[i] == "place10" and dice == 10:
-                bankRoll = bankRoll + currentBets[i+1] * .8
-                print("Place 10 bet pays 9/5 ", currentBets[i+1] * .8, "bankRoll:", bankRoll)
+                bankRoll = bankRoll + currentBets[i+1] * 1.8
+                print("Place 10 bet pays 9/5 ", currentBets[i+1] * 1.8, "bankRoll:", bankRoll)
         if currentBets[i] == "place5" and dice == 5:
-                bankRoll = bankRoll + currentBets[i+1] * .4
-                print("Place 5 bet pays 7/5 ", currentBets[i+1] * .4, "bankRoll:", bankRoll)
+                bankRoll = bankRoll + currentBets[i+1] * 1.4
+                print("Place 5 bet pays 7/5 ", currentBets[i+1] * 1.4, "bankRoll:", bankRoll)
                 totalPoint5 = totalPoint5 + 1
         if currentBets[i] == "place9" and dice == 9:
-                bankRoll = bankRoll + currentBets[i+1] * .4                
-                print("Place 9 bet pays 7/5 ", currentBets[i+1] * .4, "bankRoll:", bankRoll)
+                bankRoll = bankRoll + currentBets[i+1] * 1.4                
+                print("Place 9 bet pays 7/5 ", currentBets[i+1] * 1.4, "bankRoll:", bankRoll)
         if currentBets[i] == "place6" and dice == 6:
-                bankRoll = bankRoll + round(currentBets[i+1] * .1667,0)
-                print("Place 6 bet pays 7/6 ", currentBets[i+1] * .1667, "bankRoll:", bankRoll)
+                bankRoll = bankRoll + currentBets[i+1] * 7 / 6
+                print("Place 6 bet pays 7/6 ", currentBets[i+1] * 7 / 6, "bankRoll:", bankRoll)
                 totalPoint6 = totalPoint6 + 1
         if currentBets[i] == "place8" and dice == 8:
-                bankRoll = bankRoll + round(currentBets[i+1] * .1667, 0)
-                print("Place 8 bet pays 7/6 ", currentBets[i+1] * .1667, "bankRoll:", bankRoll)
+                bankRoll = bankRoll + currentBets[i+1] * 7 / 6
+                print("Place 8 bet pays 7/6 ", currentBets[i+1] * 7 / 6, "bankRoll:", bankRoll)
                 totalPoint8 = totalPoint8 + 1
 
         if dice == 7: 
