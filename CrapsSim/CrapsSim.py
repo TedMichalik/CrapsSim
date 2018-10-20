@@ -1,8 +1,7 @@
 # Author:  Ted Michalik
 # Version: 1.0
-# Date:    10/14/18
-import random
-import time
+# Date:    10/20/18
+import time, craps_methods
 from datetime import date
 
 # ----------------Display build version and local time---------------------
@@ -29,13 +28,7 @@ totalFieldDouble = 0
 totalPoint5 = 0
 totalPoint6 = 0
 totalPoint8 = 0
-
-def rollDice():
-        global die1,die2,dice,rollCount
-        die1 = random.randint(1, 6)
-        die2 = random.randint(1, 6)
-        dice = die1 + die2
-        print("You roll a", die1, "and", die2, "for a total of", dice)
+print_results = True
 
 def printState():
     print("\nprintState(): bankRoll:", str(bankRoll), " rollState:", str(rollState), "rollCount:", str(rollCount))
@@ -182,7 +175,7 @@ def comeOutRoll():
     
     print("ComeOutRoll")
     addBets()
-    rollDice()
+    craps_methods.rollDice(die1,die2,dice,rollCount,print_results)
     
     if dice == 7 or dice == 11 or dice == 2 or dice == 3 or dice == 12 :
         payBets()
@@ -202,7 +195,7 @@ def pointRoll():
     while stillRolling == 1:
         #print("rolling for point: ", currentPoint)
         addBets()
-        rollDice()
+        rollDice(die1,die2,dice,rollCount,print_results)
         payBets()
         
         #conditions
