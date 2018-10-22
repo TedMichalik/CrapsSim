@@ -11,24 +11,23 @@ current_time = time.asctime(time.localtime(time.time()))
 print("\n\nBuild Version:", str(build_version), "\nTime:", str(current_time), "\n\n")
 # -------------------------------------------------------------------------
 
-#Global Scope
-bankRoll = 300
-currentPoint = 0
-currentBets = []
-rollState = 0
-rollCount = 0
-die1 = 0
-die2 = 0
-dice = 0
-gamesToPlay = 5
-totalComeOutWins = 0
-totalComeOutLoss = 0
-totalField = 0
-totalFieldDouble = 0
-totalPoint5 = 0
-totalPoint6 = 0
-totalPoint8 = 0
-print_results = True
+def crapsTestSim(numGames):
+    """Plays numGames consecutive games for testing purposes"""
+    minimum_bet = 5  # Minimium bet to place on the Pass/Don't Pass & Come/Don't Come lines
+    odds_bet = 10  # Odds bet to place behind the Pass/Don't Pass & Come/Don't Come lines
+    starting_pot = 300  # Starting amount with which to bet
+    right_way = True  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
+    working = True  # While shooter retains dice, i.e. throws a point, keep any Come/Don't Come Bet Odds working on the Opening Roll
+    rollCount = 0 # Number of rolls in this game.
+    print_results = True  # Print results of each roll; good to use while testing
+
+    c = craps_methods.CrapsGame(minimum_bet, odds_bet, starting_pot, right_way, working, print_results)
+
+    for t in range(numGames):
+        if rollCount == 0:
+            c.add_line_bet(minimum_bet, True, rollCount, print_results)
+        c.shooter_rolls()
+
 
 def printState():
     print("\nprintState(): bankRoll:", str(bankRoll), " rollState:", str(rollState), "rollCount:", str(rollCount))
@@ -175,7 +174,7 @@ def comeOutRoll():
     
     print("ComeOutRoll")
     addBets()
-    craps_methods.rollDice(die1,die2,dice,rollCount,print_results)
+    die1,die2,dice,rollCount = craps_methods.rollDice(print_results)
     
     if dice == 7 or dice == 11 or dice == 2 or dice == 3 or dice == 12 :
         payBets()
@@ -195,7 +194,7 @@ def pointRoll():
     while stillRolling == 1:
         #print("rolling for point: ", currentPoint)
         addBets()
-        rollDice(die1,die2,dice,rollCount,print_results)
+        die1,die2,dice,rollCount = craps_methods.rollDice(print_results)
         payBets()
         
         #conditions
@@ -256,20 +255,4 @@ def addBets():
             
     
         
-if __name__ == '__main__':
-
-    try:
-        print("Start")
-        printState()
-     
-        g = 1
-        while g <= gamesToPlay:
-            print("Game:", g)
-            comeOutRoll()
-            printState() 
-            g = g + 1
-        
-        #printState()        
-    except KeyboardInterrupt:
-       print('\nGamed ended by user!')
-    # TODO: Maybe a little game summary here
+crapsTestSim(3)
