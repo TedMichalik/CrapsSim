@@ -14,24 +14,33 @@ print("\n\nBuild Version:", str(build_version), "\nTime:", str(current_time), "\
 def crapsTestSim(numGames):
     """Plays numGames consecutive games for testing purposes"""
     minimum_bet = 5  # Minimium bet to place on the Pass/Don't Pass & Come/Don't Come lines
-    odds_bet = 10  # Odds bet to place behind the Pass/Don't Pass & Come/Don't Come lines
     starting_pot = 300  # Starting amount with which to bet
     right_way = True  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
     working = True  # While shooter retains dice, i.e. throws a point, keep any Come/Don't Come Bet Odds working on the Opening Roll
     print_results = True  # Print results of each roll; good to use while testing
 
-    c = craps_methods.CrapsGame(minimum_bet, odds_bet, starting_pot, right_way, working, print_results)
+    c = craps_methods.CrapsGame(minimum_bet, starting_pot, working, print_results)
 
     for t in range(numGames):
         c.rollCount = 0
         c.point = 0
         c.resolved = False
 
-        c.add_bet("Pass",minimum_bet, True)
+        c.add_bet("Pass", minimum_bet, right_way) # True = bet "Do" Pass/Come side; False = bet "Don't" Pass/Come side
 
         while not c.resolved:
             c.shooter_rolls()
-
+            if c.rollCount == 1:
+                if not right_way:
+                    max_odds = 6 * minimum_bet
+                else:
+                    if c.point in [4,10]:
+                        max_odds = 3 * minimum_bet
+                    elif c.point in [5,9]:
+                        max_odds = 4 * minimum_bet
+                    elif c.point in [6,8]:
+                        max_odds = 5 * minimum_bet
+                c.set_odds("Pass", max_odds, c.point, right_way)
 
 def printState():
     print("\nprintState(): bankRoll:", str(bankRoll), " rollState:", str(rollState), "rollCount:", str(rollCount))
@@ -259,4 +268,4 @@ def addBets():
             
     
         
-crapsTestSim(3)
+crapsTestSim(5)

@@ -1,13 +1,11 @@
 import random
 
 class CrapsGame(object):
-    def __init__(self, min_bet, odds_bet, start_amount, right_way, working, print_results):
+    def __init__(self, min_bet, start_amount, working, print_results):
         """Passed variables"""
         self.min_bet = min_bet  # amount bet (int) on pass/don't pass line, come/don't come line
-        self.odds_bet = odds_bet  # amount (int) that can be bet "behind the pass/don't pass or come/don't come line"
         self.start_amount = start_amount  # $ amount with which one walks up to table
         self.pot_amount = start_amount  # track $$ left in pot after each shooter roll
-        self.right_way = right_way  # track whether to bet on Do or Don't side
         self.working = working  # track whether or not to let Come Odds "work" on the Come Out roll (Don't Come Odds always ON)
         self.print_results = print_results # True/False whether to print roll by roll stats (for testing)
         """Object tracking variables"""
@@ -26,13 +24,46 @@ class CrapsGame(object):
         if self.print_results:
             print("Pot amount =", self.pot_amount)
 
+    def set_point(self, type, point):
+        for x in self.bets:
+            if x.type == "Pass":
+                x.point = point
+
+    def set_odds(self, type, bet, point, right_way):
+        for x in self.bets:
+            if (x.type == "Pass") and (x.right_way == right_way) and (x.point == point):
+                change = bet - x.odds_bet
+                if change != 0:
+                    x.odds_bet = bet
+                    self.pot_amount -= change
+                    if self.print_results:
+                        if x.right_way:
+                            print(x.type, "Odds bet =", change, "Pot amount =", self.pot_amount)
+                        else:
+                            print("Don't", x.type, "Odds bet =", change, "Pot amount =", self.pot_amount)
+
     def pay_bet(self, type, win):
         winnings = 0
         for x in self.bets:
             if x.type == "Pass":
-                if (win and x.right_way) or (not win and not x.right_way):
+                if (win and x.right_way):
                     winnings += 2 * x.bet
+                    if x.point in [4,10]:
+                        winnings += x.odds_bet + x.odds_bet * 2
+                    elif x.point in [5,9]:
+                        winnings += x.odds_bet + x.odds_bet * 3 / 2
+                    elif x.point in [6,8]:
+                        winnings += x.odds_bet + x.odds_bet * 6 / 5
+                elif (not win and not x.right_way):
+                    winnings += 2 * x.bet
+                    if x.point in [4,10]:
+                        winnings += x.odds_bet + x.odds_bet / 2
+                    elif x.point in [5,9]:
+                        winnings += x.odds_bet + x.odds_bet * 2 / 3
+                    elif x.point in [6,8]:
+                        winnings += x.odds_bet + x.odds_bet * 5 / 6
                 self.bets.remove(x)
+        winnings = int(winnings)
         self.pot_amount += winnings
         if self.print_results:
             print("Winnings =", winnings, "Pot amount =", self.pot_amount)
@@ -58,6 +89,7 @@ class CrapsGame(object):
             else:
                 self.point = self.dice
                 self.rollCount += 1
+                self.set_point("Pass", self.point)
                 if self.print_results:
                     print("Point =", self.point, "on roll", self.rollCount)
         else:
