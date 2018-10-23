@@ -15,7 +15,7 @@ def crapsTestSim(numGames):
     """Plays numGames consecutive games for testing purposes"""
     minimum_bet = 5  # Minimium bet to place on the Pass/Don't Pass & Come/Don't Come lines
     starting_pot = 300  # Starting amount with which to bet
-    right_way = True  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
+    right_way = False  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
     working = True  # While shooter retains dice, i.e. throws a point, keep any Come/Don't Come Bet Odds working on the Opening Roll
     print_results = True  # Print results of each roll; good to use while testing
 

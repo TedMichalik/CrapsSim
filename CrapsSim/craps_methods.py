@@ -55,13 +55,16 @@ class CrapsGame(object):
                     elif x.point in [6,8]:
                         winnings += x.odds_bet + x.odds_bet * 6 / 5
                 elif (not win and not x.right_way):
-                    winnings += 2 * x.bet
-                    if x.point in [4,10]:
-                        winnings += x.odds_bet + x.odds_bet / 2
-                    elif x.point in [5,9]:
-                        winnings += x.odds_bet + x.odds_bet * 2 / 3
-                    elif x.point in [6,8]:
-                        winnings += x.odds_bet + x.odds_bet * 5 / 6
+                    if self.rollCount == 0 and self.dice == 12:
+                        winnings = x.bet # Push for 12 on Don't pass comeout roll
+                    else:
+                        winnings += 2 * x.bet
+                        if x.point in [4,10]:
+                            winnings += x.odds_bet + x.odds_bet / 2
+                        elif x.point in [5,9]:
+                            winnings += x.odds_bet + x.odds_bet * 2 / 3
+                        elif x.point in [6,8]:
+                            winnings += x.odds_bet + x.odds_bet * 5 / 6
                 self.bets.remove(x)
         winnings = int(winnings)
         self.pot_amount += winnings
@@ -83,7 +86,7 @@ class CrapsGame(object):
                 self.resolved = True
             elif self.dice in [2,3,12]:
                 if self.print_results:
-                    print("Pass line loses. Don't pass line wins.")
+                    print("Pass line loses. Don't pass line wins/pushes.")
                 self.pay_bet("Pass", False)
                 self.resolved = True
             else:
