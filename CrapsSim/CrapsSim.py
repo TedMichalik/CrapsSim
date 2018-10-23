@@ -18,15 +18,19 @@ def crapsTestSim(numGames):
     starting_pot = 300  # Starting amount with which to bet
     right_way = True  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
     working = True  # While shooter retains dice, i.e. throws a point, keep any Come/Don't Come Bet Odds working on the Opening Roll
-    rollCount = 0 # Number of rolls in this game.
     print_results = True  # Print results of each roll; good to use while testing
 
     c = craps_methods.CrapsGame(minimum_bet, odds_bet, starting_pot, right_way, working, print_results)
 
     for t in range(numGames):
-        if rollCount == 0:
-            c.add_line_bet(minimum_bet, True, rollCount, print_results)
-        c.shooter_rolls()
+        c.rollCount = 0
+        c.point = 0
+        c.resolved = False
+
+        c.add_bet("Pass",minimum_bet, True)
+
+        while not c.resolved:
+            c.shooter_rolls()
 
 
 def printState():

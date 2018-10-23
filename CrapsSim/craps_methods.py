@@ -11,77 +11,85 @@ class CrapsGame(object):
         self.working = working  # track whether or not to let Come Odds "work" on the Come Out roll (Don't Come Odds always ON)
         self.print_results = print_results # True/False whether to print roll by roll stats (for testing)
         """Object tracking variables"""
-        self.line_bets = []  # list of LineBet objects to track Pass & Come Line bets
+        self.bets = []  # list of Bet objects to track
         self.die1 = 0
         self.die2 = 0
         self.dice = 0
         self.rollCount = 0
         self.point = 0
+        self.resolved = False
 
-    def add_line_bet(self, min_bet, right_way, rollCount, print_results):
-        self.x = LineBet(min_bet, right_way, rollCount, print_results)
-        self.line_bets.append(self.x)
+    def add_bet(self, type, bet, right_way):
+        self.x = Bet(type, bet, right_way, self.print_results)
+        self.bets.append(self.x)
+        self.pot_amount -= bet
+        if self.print_results:
+            print("Pot amount =", self.pot_amount)
 
-
+    def pay_bet(self, type, win):
+        winnings = 0
+        for x in self.bets:
+            if x.type == "Pass":
+                if (win and x.right_way) or (not win and not x.right_way):
+                    winnings += 2 * x.bet
+                self.bets.remove(x)
+        self.pot_amount += winnings
+        if self.print_results:
+            print("Winnings =", winnings, "Pot amount =", self.pot_amount)
 
 
     def shooter_rolls(self):
-        while True:
-            self.die1 = random.randint(1, 6)
-            self.die2 = random.randint(1, 6)
-            self.dice = self.die1 + self.die2
-            if self.print_results:
-                print("You roll a", self.die1, "and", self.die2, "for a total of", self.dice)
-            if self.rollCount == 0:
-                if self.dice in [7,11]:
-                    if self.print_results:
-                        print("Pass line wins. Don't pass line loses.")
-                    break
-                elif self.dice in [2,3,12]:
-                    if self.print_results:
-                        print("Pass line loses. Don't pass line wins.")
-                    break
-                else:
-                    self.point = self.dice
-                    self.rollCount += 1
-                    if self.print_results:
-                        print("Point =", self.point, "on roll", self.rollCount)
+        self.die1 = random.randint(1, 6)
+        self.die2 = random.randint(1, 6)
+        self.dice = self.die1 + self.die2
+        if self.print_results:
+            print("You roll a", self.die1, "and", self.die2, "for a total of", self.dice)
+        if self.rollCount == 0:
+            if self.dice in [7,11]:
+                if self.print_results:
+                    print("Pass line wins. Don't pass line loses.")
+                self.pay_bet("Pass", True)
+                self.resolved = True
+            elif self.dice in [2,3,12]:
+                if self.print_results:
+                    print("Pass line loses. Don't pass line wins.")
+                self.pay_bet("Pass", False)
+                self.resolved = True
             else:
-                if self.dice == self.point:
-                    self.rollCount = 0
-                    if self.print_results:
-                        print("Pass line wins. Don't pass line loses.")
-                    break
-                elif self.dice == 7:
-                    self.rollCount = 0
-                    if self.print_results:
-                        print("Pass line loses. Don't pass line wins.")
-                    break
-                else:
-                    self.rollCount += 1
-                    if self.print_results:
-                        print("Point =", self.point, "on roll", self.rollCount)
+                self.point = self.dice
+                self.rollCount += 1
+                if self.print_results:
+                    print("Point =", self.point, "on roll", self.rollCount)
+        else:
+            if self.dice == self.point:
+                if self.print_results:
+                    print("Pass line wins. Don't pass line loses.")
+                self.pay_bet("Pass", True)
+                self.resolved = True
+            elif self.dice == 7:
+                if self.print_results:
+                    print("Pass line loses. Don't pass line wins.")
+                self.pay_bet("Pass", False)
+                self.resolved = True
+            else:
+                self.rollCount += 1
+                if self.print_results:
+                    print("Point =", self.point, "on roll", self.rollCount)
 
 
 
-class LineBet(object):
-    def __init__(self, min_bet, right_way, rollCount, print_results):
-        """Passed variables"""
-        self.min_bet = min_bet
+class Bet(object):
+    def __init__(self, type, bet, right_way, print_results):
+        """Passed variables: type, bet, True/False (Pass/Don't pass), True/False (Print/Don't print)"""
+        self.type = type
+        self.bet = bet
         self.right_way = right_way # Pass/Come (True) bet or Don't Pass/Don't Come (False) bet
-        self.rollCount = rollCount
         self.print_results = print_results # True/False whether to print roll by roll stats (for testing)
         """Object tracking variables"""
         self.point = 0
         self.odds_bet = 0
         if self.print_results:
-            if self.rollCount == 0:
-                if self.right_way:
-                    print("Pass bet =", self.min_bet)
-                else:
-                    print("Don't pass bet =", self.min_bet)
+            if self.right_way:
+                print(self.type, "bet =", self.bet)
             else:
-                if self.right_way:
-                    print("Come bet =", self.min_bet)
-                else:
-                    print("Don't come bet =", self.min_bet)
+                print("Don't", self.type, "bet =", self.bet)
