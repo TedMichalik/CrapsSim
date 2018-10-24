@@ -45,7 +45,15 @@ class CrapsGame(object):
     def pay_bet(self, type, win):
         winnings = 0
         for x in self.bets:
-            if x.type == "Pass":
+            if type == "Field" and type == x.type:
+                if win:
+                    winnings += 2 * x.bet
+                    if self.dice == 2:
+                        winnings += x.bet
+                    elif self.dice == 12:
+                        winnings += 2 * x.bet
+                self.bets.remove(x)
+            if type == "Pass" and type == x.type:
                 if (win and x.right_way):
                     winnings += 2 * x.bet
                     if x.point in [4,10]:
@@ -78,7 +86,15 @@ class CrapsGame(object):
         self.dice = self.die1 + self.die2
         if self.print_results:
             print("You roll a", self.die1, "and", self.die2, "for a total of", self.dice)
-        if self.rollCount == 0:
+        if self.dice in [2,3,4,9,10,11,12]: # Field Bet
+            if self.print_results:
+                print("Field bet wins.")
+            self.pay_bet("Field", True)
+        else:
+            if self.print_results:
+                print("Field bet loses.")
+            self.pay_bet("Field", False)
+        if self.rollCount == 0: # Comeout roll
             if self.dice in [7,11]:
                 if self.print_results:
                     print("Pass line wins. Don't pass line loses.")
@@ -95,7 +111,7 @@ class CrapsGame(object):
                 self.set_point("Pass", self.point)
                 if self.print_results:
                     print("Point =", self.point, "on roll", self.rollCount)
-        else:
+        else: # Point roll
             if self.dice == self.point:
                 if self.print_results:
                     print("Pass line wins. Don't pass line loses.")
