@@ -32,25 +32,10 @@ def crapsTestSim(numGames):
         while not c.resolved:
             c.shooter_rolls()
             if c.rollCount == 1:
-                if not right_way:
-                    max_odds = 6 * minimum_bet
-                else:
-                    if c.point in [4,10]:
-                        max_odds = 3 * minimum_bet
-                    elif c.point in [5,9]:
-                        max_odds = 4 * minimum_bet
-                    elif c.point in [6,8]:
-                        max_odds = 5 * minimum_bet
+                max_odds = Odds3_4_5x(c.point, minimum_bet, right_way)
                 c.set_odds("Pass", max_odds, c.point, right_way)
 
-def printState():
-    print("\nprintState(): bankRoll:", str(bankRoll), " rollState:", str(rollState), "rollCount:", str(rollCount))
-    betlen = len(currentBets) / 2
-    print("currentBets:", currentBets)
-    print("Current Dice:", dice, "Die1:", die1, "Die2:", die2)
-    print("ComeOutWins:", totalComeOutWins, "ComeOutLosses:", totalComeOutLoss, "TotalPoint5:", totalPoint5, "TotalPoint6:", totalPoint6, "TotalPoint8:", totalPoint8)
-    print("TotalField:", totalField, "totalFieldDouble:", totalFieldDouble)
-    print("currentBetsLen:", str(betlen), "currentPoint:", str(currentPoint), "\n")
+
 
 def placeBets():
     #place bet strategy
@@ -200,73 +185,17 @@ def comeOutRoll():
 
     #printState()  
     
-def pointRoll():
-    #TODO roll the dice until point comes in.  Have ability to pull bets down (place)
-    global rollState, currentPoint, rollCount
-    stillRolling = 1
-    rollCount = 1
-    while stillRolling == 1:
-        #print("rolling for point: ", currentPoint)
-        addBets()
-        die1,die2,dice,rollCount = craps_methods.rollDice(print_results)
-        payBets()
-        
-        #conditions
-        if dice == 7:
-            print("out, remove bets")
-            stillRolling = 0
-            rollState = 0
-        elif dice == currentPoint:
-            print("point hit, pay bets")
-            stillRolling = 0
-            rollState = 0
-            #takedown field bets, if there
-            takeDown("place4")
-            takeDown("place5")
-            takeDown("place6")
-            takeDown("place8")
-            takeDown("place9")
-            takeDown("place10")
-            
-        print("RollCount: ", rollCount)
-        rollCount = rollCount + 1
+def Odds3_4_5x(point, bet, right_way):
+    if not right_way:
+        max_odds = 6 * bet
+    else:
+        if point in [4,10]:
+            max_odds = 3 * bet
+        elif point in [5,9]:
+            max_odds = 4 * bet
+        elif point in [6,8]:
+            max_odds = 5 * bet
+    return max_odds
 
-def addBets():
-        #Start up for adding bets at any point during the game, multiple games
-        global rollCount, rollState
-        #print("In addBets, rollState and rollCount", rollState, rollCount)
-        
-        #always play the field
-        #addBet("field", 10)
-        
-        if rollState == 0:
-            #Start of a game, place passline bet
-            #addBet("pass", 100)
-            doNothing = 0
-        
-        if rollState == 1:
-            doNothing = 0
-            
-            #bet only on the 1st roll after point
-            if rollCount == 1:
-                addBet("field", 25)
-                addBet("place5",25)
-                addBet("place6",30)
-                addBet("place8",30)
-
-                
-                doNothing = 0
-
-            if rollCount == 2 or rollCount == 3:
-                takeDown("place5")
-                takeDown("place6")
-                takeDown("place8")
-                addBet("field", 5)
-                addBet("place5",5)
-                addBet("place6",6)
-                addBet("place8",6)
-                    
-            
-    
         
 crapsTestSim(5)
