@@ -18,11 +18,12 @@ class CrapsGame(object):
         self.resolved = False
 
     def add_bet(self, type, bet, right_way):
-        self.x = Bet(type, bet, right_way, self.print_results)
-        self.bets.append(self.x)
-        self.pot_amount -= bet
-        if self.print_results:
-            print("Pot amount =", self.pot_amount)
+        if self.pot_amount >= bet:
+            self.x = Bet(type, bet, right_way, self.print_results)
+            self.bets.append(self.x)
+            self.pot_amount -= bet
+            if self.print_results:
+                print("Pot amount =", self.pot_amount)
 
     def set_point(self, type, point):
         for x in self.bets:
@@ -33,7 +34,7 @@ class CrapsGame(object):
         for x in self.bets:
             if (x.type == "Pass") and (x.right_way == right_way) and (x.point == point):
                 change = bet - x.odds_bet
-                if change != 0:
+                if change != 0 and self.pot_amount >= change:
                     x.odds_bet = bet
                     self.pot_amount -= change
                     if self.print_results:

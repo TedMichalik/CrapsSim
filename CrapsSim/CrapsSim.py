@@ -3,6 +3,7 @@
 # Date:    10/20/18
 import time, craps_methods
 from datetime import date
+import matplotlib.pyplot as plt
 
 # ----------------Display build version and local time---------------------
 today = date.today()
@@ -10,6 +11,39 @@ build_version = 1.0
 current_time = time.asctime(time.localtime(time.time()))
 print("\n\nBuild Version:", str(build_version), "\nTime:", str(current_time), "\n\n")
 # -------------------------------------------------------------------------
+
+
+def WinFrequency():
+    """Creates win amount frequency chart for Craps strategy"""
+    sessions = 10000 # Number of 100 game sessions to run
+    x = [] # Amount won or lost list
+    y = [] # Number of times that amount was won or lost
+    TotalLost = 0
+    TotalWon = 0
+    MaxWin = 0
+
+    for s in range(sessions):
+        won = PassWithOdds(100, False)
+        if won in x:
+            i = x.index(won)
+            y[i] += 1
+        else:
+            x.append(won)
+            y.append(1)
+        if won < 0:
+            TotalLost -= won
+        else:
+            TotalWon += won
+        if won > MaxWin:
+            MaxWin = won
+    edge = (1 - TotalWon / TotalLost) * 100
+    edge = round(edge, 2)
+    current_time = time.asctime(time.localtime(time.time()))
+    print("Calculations complete.\nTime:", str(current_time), "\n\n")
+    print("For", sessions, "sessions: Max Win =", MaxWin)
+    print("Total Lost =", TotalLost, ", Total Won =", TotalWon, ", House Edge =", edge, "%")
+    plt.plot(x, y)
+
 
 def crapsTestSim(numGames):
     """Plays numGames consecutive games for testing purposes"""
@@ -34,157 +68,52 @@ def crapsTestSim(numGames):
             if c.rollCount == 1:
                 max_odds = Odds3_4_5x(c.point, minimum_bet, right_way)
                 c.set_odds("Pass", max_odds, c.point, right_way)
-
-
-
-def placeBets():
-    #place bet strategy
-    #current plan, field bet, place 5,6,8
-    print("hold for placeBets()")
-    
-def addBet(betType, amount):
-    global bankRoll, rollCount
-    #add a bet to the bet array
-    currentBets.append(betType)
-    currentBets.append(amount)
-    bankRoll = bankRoll - amount
-    print("Added bet:", str(betType), ":", str(amount), "bankRoll:", bankRoll)
-
-def takeDown(betName):
-    #remove a bet and credit bankroll
-    global currentBets,bankRoll
-    
-    i = 0
-    while i < len(currentBets):
-        if currentBets[i] == betName:
-            #credit bet
-            bankRoll = bankRoll + currentBets[i+1]
-            print("Takedown: ", currentBets[i], "for", currentBets[i+1], "bankRoll:", bankRoll)
-            
-            #remove bet on next add bet
-            currentBets[i] = "delete"
-            currentBets[i+1] = 0
-        i = i + 2
-        
-def payBets():
-    #TODO loop thru currentBets, eval for win and calc payout
-    #currentBets format is currentBets[0] currentBets[1] =  betType (place5, place4, field) and amount (10,20,100, etc) in pairs
-    
-    global bankRoll, currentBets, currentPoint, dice, rollState, totalComeOutLoss, totalComeOutWins, totalPoint5, totalPoint6, totalPoint8, totalField, totalFieldDouble, bankRoll
-        
-    #New single loop
-    #Loop thru bets, pay and remove bets
-    i = 0
-    while i < len(currentBets):
-        
-        #print("Checking current bets:", currentBets[i], " at ", currentBets[i+1] )
-           
-        #pass bets
-        if currentBets[i] == "pass":
-            if rollState == 0:
-                #Check for come out roll win
-                if dice == 7 or dice == 11:
-                    bankRoll = bankRoll + currentBets[i+1] * 2
-                    print("pass line bet pays ", currentBets[i+1], "bankRoll:", bankRoll)
-                    currentBets[i] = "delete"
-                    currentBets[i+1] = 0
-                    totalComeOutWins = totalComeOutWins + 1
-                #Check for come out roll lose    
-                if dice == 2 or dice == 3 or dice == 12:
-                    print("pass line lose, lose bet", "bankRoll:", bankRoll)
-                    currentBets[i] = "delete"
-                    currentBets[i+1] = 0
-                    totalComeOutLoss = totalComeOutLoss + 1
-            #Check for point win
-            if rollState == 1:
-                if dice == currentPoint:
-                  bankRoll = bankRoll + currentBets[i+1] * 2
-                  print("pass line bet pays ", currentBets[i+1], "bankRoll:", bankRoll)
-                  currentBets[i] = "delete"
-                  currentBets[i+1] = 0
-            #Check for point loss
-                if dice == 7:
-                    #kill all bets, prob should do delete 
-                      currentBets[i] = "delete"
-                      currentBets[i+1] = 0
-
-            
-        #Check for field win 3,4,9,10,11 1:2 pay, 2/12 2x pay
-        if currentBets[i] == "field":
-            if dice == 3 or dice == 4 or dice == 9 or dice == 10 or dice == 11:           
-                bankRoll = bankRoll + (currentBets[i+1] * 2)
-                print("field bet pays 1:1 ", currentBets[i+1] * 2, "bankRoll:", bankRoll)
-                totalField = totalField + 1
-            if dice == 2 or dice == 12:           
-                bankRoll = bankRoll + currentBets[i+1] * 3
-                print("2/12 field bet pays 2:1 ", currentBets[i+1] * 3, "bankRoll:", bankRoll)
-                totalFieldDouble = totalFieldDouble + 1
-            
-            #Either way field bet comes down
-            currentBets[i] = "delete"
-            currentBets[i+1] = 0
-        
-        #Check for Place Wins, will come down automatically with 7-out
-        if currentBets[i] == "place4" and dice == 4:
-                bankRoll = bankRoll + currentBets[i+1] * 1.8
-                print("Place 4 bet pays 9/5 ", currentBets[i+1] * 1.8, "bankRoll:", bankRoll)
-        if currentBets[i] == "place10" and dice == 10:
-                bankRoll = bankRoll + currentBets[i+1] * 1.8
-                print("Place 10 bet pays 9/5 ", currentBets[i+1] * 1.8, "bankRoll:", bankRoll)
-        if currentBets[i] == "place5" and dice == 5:
-                bankRoll = bankRoll + currentBets[i+1] * 1.4
-                print("Place 5 bet pays 7/5 ", currentBets[i+1] * 1.4, "bankRoll:", bankRoll)
-                totalPoint5 = totalPoint5 + 1
-        if currentBets[i] == "place9" and dice == 9:
-                bankRoll = bankRoll + currentBets[i+1] * 1.4                
-                print("Place 9 bet pays 7/5 ", currentBets[i+1] * 1.4, "bankRoll:", bankRoll)
-        if currentBets[i] == "place6" and dice == 6:
-                bankRoll = bankRoll + currentBets[i+1] * 7 / 6
-                print("Place 6 bet pays 7/6 ", currentBets[i+1] * 7 / 6, "bankRoll:", bankRoll)
-                totalPoint6 = totalPoint6 + 1
-        if currentBets[i] == "place8" and dice == 8:
-                bankRoll = bankRoll + currentBets[i+1] * 7 / 6
-                print("Place 8 bet pays 7/6 ", currentBets[i+1] * 7 / 6, "bankRoll:", bankRoll)
-                totalPoint8 = totalPoint8 + 1
-
-        if dice == 7: 
-            #Every bet gets killed on 7
-            currentBets[i] = "delete"
-            currentBets[i+1] = 0
-            
-            
-        #keep on looping, mofo
-        i += 2   
-
-    #Cycle thru and remove all delete bets        
-    for item in currentBets[:]:
-        if item == "delete":
-            currentBets.remove(item)
-        if item == 0:
-            currentBets.remove(item)
-
-
-
-    
-def comeOutRoll():
-    #TODO roll dice, eval for win/loss/point - not going to program pass line at this time (iron cross)
-    global currentPoint, rollState, dice
-    rollState=0
-    
-    print("ComeOutRoll")
-    addBets()
-    die1,die2,dice,rollCount = craps_methods.rollDice(print_results)
-    
-    if dice == 7 or dice == 11 or dice == 2 or dice == 3 or dice == 12 :
-        payBets()
     else:
-        print("point: ", dice)
-        currentPoint = dice
-        rollState = 1
-        pointRoll()
+        print(t)
 
-    #printState()  
-    
+def PassWithOdds(numGames, print_status):
+    """Plays numGames consecutive with Pass line bet and max odds"""
+    minimum_bet = 5  # Minimium bet to place on the Pass/Don't Pass & Come/Don't Come lines
+    starting_pot = 300  # Starting amount with which to bet
+    right_way = True  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
+    print_results = print_status  # Print results after all games complete
+    """ Plotting Data """
+    x = [] # Game number
+    y = [] # Pot amount after each game
+
+    c = craps_methods.CrapsGame(minimum_bet, starting_pot, False, False)
+
+    for t in range(numGames):
+        c.rollCount = 0
+        c.point = 0
+        c.resolved = False
+        if print_results:
+            print("After game", t, ", the pot amount is", c.pot_amount)
+        x.append(t)
+        y.append(c.pot_amount)
+        if c.pot_amount <= 0:
+            winnings = c.pot_amount - starting_pot
+            SessionResults(t, c.pot_amount, winnings, x, y, print_results)
+            return winnings
+
+        # Place bets for the Come out roll here.
+        c.add_bet("Pass", minimum_bet, right_way) # True = bet "Do" Pass/Come side; False = bet "Don't" Pass/Come side
+
+        while not c.resolved:
+            c.shooter_rolls()
+            if c.rollCount == 1:
+                # Pass line Point set. Place bets here.
+                max_odds = Odds3_4_5x(c.point, minimum_bet, right_way)
+                #c.set_odds("Pass", max_odds, c.point, right_way)
+    else:
+        t += 1
+        winnings = c.pot_amount - starting_pot
+        x.append(t)
+        y.append(c.pot_amount)
+        SessionResults(t, c.pot_amount, winnings, x, y, print_results)
+        return winnings
+
+
 def Odds3_4_5x(point, bet, right_way):
     if not right_way:
         max_odds = 6 * bet
@@ -198,4 +127,19 @@ def Odds3_4_5x(point, bet, right_way):
     return max_odds
 
         
-crapsTestSim(5)
+def SessionResults(t, pot, winnings, x, y, print_results):
+    if print_results:
+        print("After game", t, ", the pot amount is", pot)
+        print("Total winnings =", winnings)
+        plt.plot(x, y)
+        plt.xlabel('Game')
+        plt.ylabel('Pot Amount')
+        plt.title('Craps Session History - Pass with max odds')
+        plt.show()
+    pass
+
+
+
+#crapsTestSim(5)
+#won = PassWithOdds(100, True)
+WinFrequency()
