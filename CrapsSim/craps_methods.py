@@ -36,7 +36,7 @@ class CrapsGame(object):
                 change = bet - x.odds_bet
                 if change != 0 and self.pot_amount >= change:
                     x.odds_bet = bet
-                    self.pot_amount -= change
+                    self.pot_amount -= change 
                     if self.print_results:
                         if x.right_way:
                             print(x.type, "Odds bet =", change, "Pot amount =", self.pot_amount)
