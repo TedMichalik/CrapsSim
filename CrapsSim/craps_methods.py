@@ -8,6 +8,7 @@ class CrapsGame(object):
         self.working = working  # track whether or not to let Come Odds "work" on the Come Out roll (Don't Come Odds always ON)
         self.print_results = print_results # True/False whether to print roll by roll stats (for testing)
         """Object tracking variables"""
+        self.total_bet = 0 # track $$ bet
         self.total_won = 0 # track $$ won
         self.total_lost = 0 # track $$ lost
         self.bets = []  # list of Bet objects to track
@@ -23,6 +24,7 @@ class CrapsGame(object):
             self.x = Bet(type, bet, right_way, self.print_results)
             self.bets.append(self.x)
             self.pot_amount -= bet
+            self.total_bet += bet
             if self.print_results:
                 print("Pot amount =", self.pot_amount)
 
@@ -37,7 +39,8 @@ class CrapsGame(object):
                 change = bet - x.odds_bet
                 if change != 0 and self.pot_amount >= change:
                     x.odds_bet = bet
-                    self.pot_amount -= change 
+                    self.pot_amount -= change
+                    self.total_bet += change
                     if self.print_results:
                         if x.right_way:
                             print(x.type, "Odds bet =", change, "Pot amount =", self.pot_amount)
@@ -109,7 +112,7 @@ class CrapsGame(object):
         self.total_won += winnings
         self.total_lost += lost
         if self.print_results and bet != 0:
-            print("Winnings =", winnings, "Bets =", bet, "Pot amount =", self.pot_amount)
+            print("Bets =", bet, "Won =", winnings, "Lost =", lost, "Pot amount =", self.pot_amount)
 
 
     def shooter_rolls(self):
