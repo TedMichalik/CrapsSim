@@ -19,7 +19,7 @@ class CrapsGame(object):
         self.point = 0
         self.resolved = False
 
-    def add_bet(self, type, bet, right_way):
+    def add_bet(self, type, bet, right_way): # Types are: Pass, Field, Place4, Place5, Place6, Place8, Place9, Place10
         if self.pot_amount >= bet:
             self.x = Bet(type, bet, right_way, self.print_results)
             self.bets.append(self.x)
@@ -46,6 +46,19 @@ class CrapsGame(object):
                             print(x.type, "Odds bet =", change, "Pot amount =", self.pot_amount)
                         else:
                             print("Don't", x.type, "Odds bet =", change, "Pot amount =", self.pot_amount)
+            if x.type in ["Place4", "Place5", "Place6", "Place8", "Place9", "Place10"]:
+                change = bet - x.bet
+                if change != 0 and self.pot_amount >= change:
+                    x.bet = bet
+                    self.pot_amount -= change
+                    self.total_bet += change
+                    if bet == 0:
+                        self.bets.remove(x)
+                    if self.print_results:
+                        if bet == 0:
+                            print(x.type, "Bet taken down. Pot amount =", self.pot_amount)
+                        else:
+                            print(x.type, "Bet =", bet, "Pot amount =", self.pot_amount)
 
     def pay_bet(self, type, won_bet):
         bet = 0
@@ -107,6 +120,25 @@ class CrapsGame(object):
                             print("Don't pass line loses.")
                 self.bets.remove(x)
 
+            if type in ["Place4", "Place5", "Place6", "Place8", "Place9", "Place10"] and type == x.type:
+                if not won_bet:
+                    lost += x.bet
+                    if self.print_results:
+                        print(type, "loses.")
+                else:
+                    if type in ["Place4", "Place10"]:
+                        bet += x.bet
+                        won += x.bet * 9 / 5
+                    if type in ["Place5", "Place9"]:
+                        bet += x.bet
+                        won += x.bet * 7 / 5
+                    if type in ["Place6", "Place8"]:
+                        bet += x.bet
+                        won += x.bet * 7 / 6
+                    if self.print_results:
+                        print(type, "wins.")
+                self.bets.remove(x)
+
         winnings = int(won)
         self.pot_amount += winnings + bet
         self.total_won += winnings
@@ -127,11 +159,11 @@ class CrapsGame(object):
         else:
             self.pay_bet("Field", False) # Loses
 
-        if self.rollCount == 0: # Comeout roll
+        if self.rollCount == 0: # Comeout roll, place bets off
             if self.dice in [7,11]:
                 self.pay_bet("Pass", True)
                 self.resolved = True
-            elif self.dice in [2,3,12]:
+            if self.dice in [2,3,12]:
                 self.pay_bet("Pass", False)
                 self.resolved = True
             else:
@@ -141,11 +173,29 @@ class CrapsGame(object):
                 if self.print_results:
                     print("Point =", self.point, "on roll", self.rollCount)
         else: # Point roll
+            if self.dice == 4:
+                self.pay_bet("Place4", True)
+            if self.dice == 5:
+                self.pay_bet("Place5", True)
+            if self.dice == 6:
+                self.pay_bet("Place6", True)
+            if self.dice == 8:
+                self.pay_bet("Place8", True)
+            if self.dice == 9:
+                self.pay_bet("Place9", True)
+            if self.dice == 10:
+                self.pay_bet("Place10", True)
+            if self.dice == 7:
+                self.pay_bet("Pass", False)
+                self.pay_bet("Place4", False)
+                self.pay_bet("Place5", False)
+                self.pay_bet("Place6", False)
+                self.pay_bet("Place8", False)
+                self.pay_bet("Place9", False)
+                self.pay_bet("Place10", False)
+                self.resolved = True
             if self.dice == self.point:
                 self.pay_bet("Pass", True)
-                self.resolved = True
-            elif self.dice == 7:
-                self.pay_bet("Pass", False)
                 self.resolved = True
             else:
                 self.rollCount += 1

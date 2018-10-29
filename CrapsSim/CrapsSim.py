@@ -16,10 +16,10 @@ print("\n\nBuild Version:", str(build_version), "\nTime:", str(current_time), "\
 def WinFrequency():
     """Creates win amount frequency chart for Craps strategy"""
     numGames = 100 # Number of games in a session
-    pot = 2000  # Starting amount to bet for each session
-    odds = "No" # Odds bet: Max, Min, or No
-    do = False  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
-    sessions = 1000000 # Number of 100 game sessions to run
+    pot = 300  # Starting amount to bet for each session
+    odds = "Max" # Odds bet: Max, Min, or No
+    do = True  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
+    sessions = 40000 # Number of 100 game sessions to run
     x = [] # Net gain
     y = [] # Number of times that amount was won or lost
     TotalLost = 0
@@ -28,7 +28,7 @@ def WinFrequency():
     MaxWin = 0
 
     for s in range(sessions):
-        won, lost, bet = PassWithOdds(numGames, pot, odds, do, False)
+        won, lost, bet = PassWithOdds(numGames, pot, odds, do, False) # Strategy to analyze goes here
         gain = won - lost
         if gain in x:
             i = x.index(gain)
@@ -85,14 +85,17 @@ def DiceFrequency(rolls):
     plt.show()
 
 
-def crapsTestSim(numGames):
+def crapsTestSim(numGames, pot, odds, do, print_status):
     """Plays numGames consecutive games for testing purposes"""
     minimum_bet = 5  # Minimium bet to place on the Pass/Don't Pass & Come/Don't Come lines
-    starting_pot = 300  # Starting amount with which to bet
-    odds = "No" # Odds bet: Max, Min, or No
-    right_way = True  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
-    working = True  # While shooter retains dice, i.e. throws a point, keep any Come/Don't Come Bet Odds working on the Opening Roll
-    print_results = True  # Print results of each roll; good to use while testing
+    starting_pot = pot  # Starting amount with which to bet
+    right_way = do  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
+    working = True  # While shooter retains dice, i.e. throws a point, keep any Come/Don't Come Bet Odds working on the Opening Roll. !!!Not yet implemented!!!
+    print_results = print_status  # Print results of each roll; good to use while testing
+    """ Plotting Data """
+    plot_title = 'Craps Session History - Test Simulator'
+    x = [] # Game number
+    y = [] # Pot amount after each game
 
     c = craps_methods.CrapsGame(minimum_bet, starting_pot, working, print_results)
 
@@ -100,19 +103,44 @@ def crapsTestSim(numGames):
         c.rollCount = 0
         c.point = 0
         c.resolved = False
+        x.append(t)
+        y.append(c.pot_amount)
+        if c.pot_amount <= 0:
+            won = c.total_won
+            lost = c.total_lost
+            bet = c.total_bet
+            SessionResults(t, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
+            return won, lost, bet
 
-        c.add_bet("Pass", minimum_bet, right_way) # True = bet "Do" Pass/Come side; False = bet "Don't" Pass/Come side
+        # Place bets for the Come out roll here.
+        #c.add_bet("Pass", minimum_bet, right_way) # True = bet "Do" Pass/Come side; False = bet "Don't" Pass/Come side
         #c.add_bet("Field", minimum_bet, True)
 
         while not c.resolved:
             c.shooter_rolls()
             if c.rollCount == 1:
+                # Pass line Point set. Place bets here.
                 if odds in ["Min", "Max"]:
                     odds_bet = Odds3_4_5x(c.point, minimum_bet, odds, right_way)
-                    c.set_odds("Pass", odds_bet, c.point, right_way)
+                    #c.set_odds("Pass", odds_bet, c.point, right_way)
+                c.add_bet("Place4", minimum_bet, True)
+                c.add_bet("Place5", minimum_bet, True)
+                c.add_bet("Place6", 6, True)
+                c.add_bet("Place8", 6, True)
+                c.add_bet("Place9", minimum_bet, True)
+                c.add_bet("Place10", minimum_bet, True)
+
         print("Total Bet =", c.total_bet, "Total Won =", c.total_won, "Total Lost =", c.total_lost, "Pot Amount =", c.pot_amount)
     else:
-        print("Starting Pot =", starting_pot, "Final Pot Amount =", c.pot_amount)
+        t += 1
+        won = c.total_won
+        lost = c.total_lost
+        bet = c.total_bet
+        x.append(t)
+        y.append(c.pot_amount)
+        print("Starting Pot =", starting_pot)
+        SessionResults(t, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
+        return won, lost, bet
 
 
 def PassWithOdds(numGames, pot, odds, do, print_status):
@@ -122,6 +150,11 @@ def PassWithOdds(numGames, pot, odds, do, print_status):
     right_way = do  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
     print_results = print_status  # Print results after all games complete
     """ Plotting Data """
+    if right_way:
+        dodont = ""
+    else:
+        dodont = "Don't"
+    plot_title = 'Craps Session History -{}Pass with {} odds'.format(dodont, odds)
     x = [] # Game number
     y = [] # Pot amount after each game
 
@@ -139,7 +172,7 @@ def PassWithOdds(numGames, pot, odds, do, print_status):
             won = c.total_won
             lost = c.total_lost
             bet = c.total_bet
-            SessionResults(t, c.pot_amount, won, lost, bet, odds, right_way, x, y, print_results)
+            SessionResults(t, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
             return won, lost, bet
 
         # Place bets for the Come out roll here.
@@ -159,7 +192,7 @@ def PassWithOdds(numGames, pot, odds, do, print_status):
         bet = c.total_bet
         x.append(t)
         y.append(c.pot_amount)
-        SessionResults(t, c.pot_amount, won, lost, bet, odds, right_way, x, y, print_results)
+        SessionResults(t, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
         return won, lost, bet
 
 
@@ -192,24 +225,21 @@ def Odds3_4_5x(point, bet, odds, right_way):
     return int(max_odds)
 
         
-def SessionResults(t, pot, won, lost, bet, odds, right_way, x, y, print_results):
+def SessionResults(t, pot, won, lost, bet, plot_title, x, y, print_results):
     if print_results:
         print("After game", t, ", the pot amount is", pot)
         print("Total won =", won, "Total lost =", lost, "Total bet =", bet)
-        if right_way:
-            do = " "
-        else:
-            do = "Don't "
         plt.plot(x, y)
         plt.xlabel('Game')
         plt.ylabel('Pot Amount')
-        plt.title('Craps Session History -{}Pass with {} odds'.format(do, odds))
+        plt.title(plot_title)
         plt.show()
     pass
 
 
 
-#crapsTestSim(10)
+won, lost, bet = crapsTestSim(10, 300, "Max", True, True)
 #won, lost, bet = PassWithOdds(100, 300, "Max", False, True)
-WinFrequency()
+
+#WinFrequency()
 #DiceFrequency(1000000)
