@@ -18,6 +18,7 @@ def WinFrequency():
     numGames = 100 # Number of games in a session
     pot = 2000  # Starting amount to bet for each session
     odds = "No" # Odds bet: Max, Min, or No
+    do = False  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
     sessions = 1000000 # Number of 100 game sessions to run
     x = [] # Net gain
     y = [] # Number of times that amount was won or lost
@@ -27,7 +28,7 @@ def WinFrequency():
     MaxWin = 0
 
     for s in range(sessions):
-        won, lost, bet = PassWithOdds(numGames, pot, odds, False)
+        won, lost, bet = PassWithOdds(numGames, pot, odds, do, False)
         gain = won - lost
         if gain in x:
             i = x.index(gain)
@@ -46,11 +47,15 @@ def WinFrequency():
     print("Calculations complete.\nTime:", str(current_time), "\n\n")
     print("For", sessions, "sessions: Max Win =", MaxWin)
     print("Total Lost =", TotalLost, ", Total Won =", TotalWon, "Total Bet =", TotalBet, ", House Edge =", edge, "%")
+    if do:
+        DoString = ""
+    else:
+        DoString = "Don't "
     fig, ax = plt.subplots()
     ax.scatter(x, y, color = 'green', s=10)
     plt.xlabel('Net Gain')
     plt.ylabel('No. of Sessions ({} Games per Session)'.format(numGames))
-    plt.title('Net Gain Frequency - $5 Craps Table\nPass Line, {} Odds'.format(odds))
+    plt.title('Net Gain Frequency - $5 Craps Table\n{}Pass Line, {} Odds'.format(DoString,odds))
     plt.text(1, 1, "Avg Loss per Session={:.2f}\nHouse Edge={:.2%}\nSessions={:,}\nPot={}".format((TotalLost-TotalWon)/sessions, (TotalLost-TotalWon)/TotalBet, sessions, pot),
              horizontalalignment='right', verticalalignment='top', transform=ax.transAxes)
     plt.show()
@@ -110,11 +115,11 @@ def crapsTestSim(numGames):
         print("Starting Pot =", starting_pot, "Final Pot Amount =", c.pot_amount)
 
 
-def PassWithOdds(numGames, pot, odds, print_status):
+def PassWithOdds(numGames, pot, odds, do, print_status):
     """Plays numGames consecutive with Pass line bet and max odds"""
     minimum_bet = 5  # Minimium bet to place on the Pass/Don't Pass & Come/Don't Come lines
     starting_pot = pot  # Starting amount with which to bet
-    right_way = True  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
+    right_way = do  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
     print_results = print_status  # Print results after all games complete
     """ Plotting Data """
     x = [] # Game number
@@ -134,7 +139,7 @@ def PassWithOdds(numGames, pot, odds, print_status):
             won = c.total_won
             lost = c.total_lost
             bet = c.total_bet
-            SessionResults(t, c.pot_amount, won, lost, bet, odds, x, y, print_results)
+            SessionResults(t, c.pot_amount, won, lost, bet, odds, right_way, x, y, print_results)
             return won, lost, bet
 
         # Place bets for the Come out roll here.
@@ -154,7 +159,7 @@ def PassWithOdds(numGames, pot, odds, print_status):
         bet = c.total_bet
         x.append(t)
         y.append(c.pot_amount)
-        SessionResults(t, c.pot_amount, won, lost, bet, odds, x, y, print_results)
+        SessionResults(t, c.pot_amount, won, lost, bet, odds, right_way, x, y, print_results)
         return won, lost, bet
 
 
@@ -187,20 +192,24 @@ def Odds3_4_5x(point, bet, odds, right_way):
     return int(max_odds)
 
         
-def SessionResults(t, pot, won, lost, bet, odds, x, y, print_results):
+def SessionResults(t, pot, won, lost, bet, odds, right_way, x, y, print_results):
     if print_results:
         print("After game", t, ", the pot amount is", pot)
         print("Total won =", won, "Total lost =", lost, "Total bet =", bet)
+        if right_way:
+            do = " "
+        else:
+            do = "Don't "
         plt.plot(x, y)
         plt.xlabel('Game')
         plt.ylabel('Pot Amount')
-        plt.title('Craps Session History - Pass with {} odds'.format(odds))
+        plt.title('Craps Session History -{}Pass with {} odds'.format(do, odds))
         plt.show()
     pass
 
 
 
 #crapsTestSim(10)
-#won, lost, bet = PassWithOdds(100, 300, "Max", True)
+#won, lost, bet = PassWithOdds(100, 300, "Max", False, True)
 WinFrequency()
 #DiceFrequency(1000000)
