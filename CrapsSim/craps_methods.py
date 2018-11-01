@@ -20,15 +20,43 @@ class CrapsGame(object):
         self.resolved = False
 
     def add_bet(self, type, bet, right_way): # Types are: Pass, Field, Place4, Place5, Place6, Place8, Place9, Place10
-        if self.pot_amount >= bet:
-            self.x = Bet(type, bet, right_way, self.print_results)
-            self.bets.append(self.x)
-            self.pot_amount -= bet
-            self.total_bet += bet
-            if self.print_results:
-                print("Pot amount =", self.pot_amount)
+        if type in ["Pass", "Field"]:
+            if self.pot_amount >= bet:
+                x = Bet(type, bet, right_way, self.print_results)
+                self.bets.append(x)
+                self.pot_amount -= bet
+                self.total_bet += bet
+                if self.print_results:
+                    print("Pot amount =", self.pot_amount)
+        if type in ["Place4", "Place5", "Place6", "Place8", "Place9", "Place10"]:
+            existing_bet = False
+            for x in self.bets:
+                #print(x.type, "bet =", x.bet, ", point =", x.point, ", odds bet =", x.odds_bet)
+                if type == x.type:
+                    existing_bet = True
+                    change = bet - x.bet
+                    if change != 0 and self.pot_amount >= change:
+                        x.bet = bet
+                        self.pot_amount -= change
+                        self.total_bet += change
+                        if bet == 0:
+                            self.bets.remove(x)
+                        if self.print_results:
+                            if bet == 0:
+                                print(type, "Bet taken down. Pot amount =", self.pot_amount)
+                            else:
+                                print(type, "Bet =", bet, "Pot amount =", self.pot_amount)
+            else:
+                if not existing_bet:
+                    if self.pot_amount >= bet and bet != 0:
+                        x = Bet(type, bet, right_way, self.print_results)
+                        self.bets.append(x)
+                        self.pot_amount -= bet
+                        self.total_bet += bet
+                        if self.print_results:
+                            print("Pot amount =", self.pot_amount)
 
-    def set_point(self, type, point):
+    def _set_point(self, type, point):
         for x in self.bets:
             if x.type == "Pass":
                 x.point = point
@@ -46,19 +74,6 @@ class CrapsGame(object):
                             print(x.type, "Odds bet =", change, "Pot amount =", self.pot_amount)
                         else:
                             print("Don't", x.type, "Odds bet =", change, "Pot amount =", self.pot_amount)
-            if x.type in ["Place4", "Place5", "Place6", "Place8", "Place9", "Place10"]:
-                change = bet - x.bet
-                if change != 0 and self.pot_amount >= change:
-                    x.bet = bet
-                    self.pot_amount -= change
-                    self.total_bet += change
-                    if bet == 0:
-                        self.bets.remove(x)
-                    if self.print_results:
-                        if bet == 0:
-                            print(x.type, "Bet taken down. Pot amount =", self.pot_amount)
-                        else:
-                            print(x.type, "Bet =", bet, "Pot amount =", self.pot_amount)
 
     def pay_bet(self, type, won_bet):
         bet = 0
@@ -160,16 +175,16 @@ class CrapsGame(object):
             self.pay_bet("Field", False) # Loses
 
         if self.rollCount == 0: # Comeout roll, place bets off
-            if self.dice in [7,11]:
-                self.pay_bet("Pass", True)
+            if self.dice in [2,3,7,11,12]:
                 self.resolved = True
-            if self.dice in [2,3,12]:
-                self.pay_bet("Pass", False)
-                self.resolved = True
+                if self.dice in [7,11]:
+                    self.pay_bet("Pass", True)
+                else:
+                    self.pay_bet("Pass", False)
             else:
                 self.point = self.dice
                 self.rollCount += 1
-                self.set_point("Pass", self.point)
+                self._set_point("Pass", self.point)
                 if self.print_results:
                     print("Point =", self.point, "on roll", self.rollCount)
         else: # Point roll
@@ -197,6 +212,8 @@ class CrapsGame(object):
             if self.dice == self.point:
                 self.pay_bet("Pass", True)
                 self.resolved = True
+            if self.resolved:
+                self.rollCount = 0
             else:
                 self.rollCount += 1
                 if self.print_results:

@@ -16,10 +16,10 @@ print("\n\nBuild Version:", str(build_version), "\nTime:", str(current_time), "\
 def WinFrequency():
     """Creates win amount frequency chart for Craps strategy"""
     numGames = 100 # Number of games in a session
-    pot = 300  # Starting amount to bet for each session
+    pot = 2000  # Starting amount to bet for each session
     odds = "Max" # Odds bet: Max, Min, or No
     do = True  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
-    sessions = 40000 # Number of 100 game sessions to run
+    sessions = 1000000 # Number of 100 game sessions to run
     x = [] # Net gain
     y = [] # Number of times that amount was won or lost
     TotalLost = 0
@@ -28,7 +28,7 @@ def WinFrequency():
     MaxWin = 0
 
     for s in range(sessions):
-        won, lost, bet = PassWithOdds(numGames, pot, odds, do, False) # Strategy to analyze goes here
+        won, lost, bet = Classic_Regression(numGames, pot, odds, do, False) # Strategy to analyze goes here
         gain = won - lost
         if gain in x:
             i = x.index(gain)
@@ -55,7 +55,8 @@ def WinFrequency():
     ax.scatter(x, y, color = 'green', s=10)
     plt.xlabel('Net Gain')
     plt.ylabel('No. of Sessions ({} Games per Session)'.format(numGames))
-    plt.title('Net Gain Frequency - $5 Craps Table\n{}Pass Line, {} Odds'.format(DoString,odds))
+    plt.title('Net Gain Frequency - $5 Craps Table\nClassic Regression Strategy')
+#    plt.title('Net Gain Frequency - $5 Craps Table\n{}Pass Line, {} Odds'.format(DoString,odds))
     plt.text(1, 1, "Avg Loss per Session={:.2f}\nHouse Edge={:.2%}\nSessions={:,}\nPot={}".format((TotalLost-TotalWon)/sessions, (TotalLost-TotalWon)/TotalBet, sessions, pot),
              horizontalalignment='right', verticalalignment='top', transform=ax.transAxes)
     plt.show()
@@ -109,7 +110,7 @@ def crapsTestSim(numGames, pot, odds, do, print_status):
             won = c.total_won
             lost = c.total_lost
             bet = c.total_bet
-            SessionResults(t, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
+            SessionResults(t, starting_pot, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
             return won, lost, bet
 
         # Place bets for the Come out roll here.
@@ -130,16 +131,23 @@ def crapsTestSim(numGames, pot, odds, do, print_status):
                 c.add_bet("Place9", minimum_bet, True)
                 c.add_bet("Place10", minimum_bet, True)
 
-        print("Total Bet =", c.total_bet, "Total Won =", c.total_won, "Total Lost =", c.total_lost, "Pot Amount =", c.pot_amount)
+        print("Game", t+1, "Total Bet =", c.total_bet, "Total Won =", c.total_won, "Total Lost =", c.total_lost, "Pot Amount =", c.pot_amount)
     else:
+        # Take down remaining Place bets
+        c.add_bet("Place4", 0, True)
+        c.add_bet("Place5", 0, True)
+        c.add_bet("Place6", 0, True)
+        c.add_bet("Place8", 0, True)
+        c.add_bet("Place9", 0, True)
+        c.add_bet("Place10", 0, True)
+
         t += 1
         won = c.total_won
         lost = c.total_lost
         bet = c.total_bet
         x.append(t)
         y.append(c.pot_amount)
-        print("Starting Pot =", starting_pot)
-        SessionResults(t, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
+        SessionResults(t, starting_pot, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
         return won, lost, bet
 
 
@@ -172,7 +180,7 @@ def PassWithOdds(numGames, pot, odds, do, print_status):
             won = c.total_won
             lost = c.total_lost
             bet = c.total_bet
-            SessionResults(t, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
+            SessionResults(t, starting_pot, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
             return won, lost, bet
 
         # Place bets for the Come out roll here.
@@ -192,7 +200,72 @@ def PassWithOdds(numGames, pot, odds, do, print_status):
         bet = c.total_bet
         x.append(t)
         y.append(c.pot_amount)
-        SessionResults(t, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
+        SessionResults(t, starting_pot, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
+        return won, lost, bet
+
+
+def Classic_Regression(numGames, pot, odds, do, print_status):
+    """Plays numGames consecutive games using classic regression strategy"""
+    minimum_bet = 5  # Minimium bet to place on the Pass/Don't Pass & Come/Don't Come lines
+    starting_pot = pot  # Starting amount with which to bet
+    right_way = do  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
+    working = True  # While shooter retains dice, i.e. throws a point, keep any Come/Don't Come Bet Odds working on the Opening Roll. !!!Not yet implemented!!!
+    print_results = print_status  # Print results of each roll; good to use while testing
+    """ Plotting Data """
+    plot_title = 'Craps Session History - Classic Regression'
+    x = [] # Game number
+    y = [] # Pot amount after each game
+
+    c = craps_methods.CrapsGame(minimum_bet, starting_pot, working, print_results)
+
+    for t in range(numGames):
+        c.rollCount = 0
+        c.point = 0
+        c.resolved = False
+        x.append(t)
+        y.append(c.pot_amount)
+        hits = 0
+        if c.pot_amount <= 0:
+            won = c.total_won
+            lost = c.total_lost
+            bet = c.total_bet
+            SessionResults(t, starting_pot, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
+            return won, lost, bet
+
+        # Place bets for the Come out roll here.
+
+        while not c.resolved:
+            c.shooter_rolls()
+            if c.rollCount == 1:
+                # Pass line Point set. Place bets here.
+                c.add_bet("Place6", 12, True)
+                c.add_bet("Place8", 12, True)
+            else:
+                if c.dice in [6,8] and not c.resolved:
+                    hits += 1
+                    if hits == 1:
+                        # Go down one unit
+                        c.add_bet("Place6", 6, True)
+                        c.add_bet("Place8", 6, True)
+                    if hits == 2:
+                        # Take down bets
+                        c.add_bet("Place6", 0, True)
+                        c.add_bet("Place8", 0, True)
+
+        if print_results:
+            print("Game", t+1, "Total Bet =", c.total_bet, "Total Won =", c.total_won, "Total Lost =", c.total_lost, "Pot Amount =", c.pot_amount)
+    else:
+        # Take down remaining Place bets
+        c.add_bet("Place6", 0, True)
+        c.add_bet("Place8", 0, True)
+
+        t += 1
+        won = c.total_won
+        lost = c.total_lost
+        bet = c.total_bet
+        x.append(t)
+        y.append(c.pot_amount)
+        SessionResults(t, starting_pot, c.pot_amount, won, lost, bet, plot_title, x, y, print_results)
         return won, lost, bet
 
 
@@ -225,8 +298,9 @@ def Odds3_4_5x(point, bet, odds, right_way):
     return int(max_odds)
 
         
-def SessionResults(t, pot, won, lost, bet, plot_title, x, y, print_results):
+def SessionResults(t, start, pot, won, lost, bet, plot_title, x, y, print_results):
     if print_results:
+        print("Starting Pot =", start)
         print("After game", t, ", the pot amount is", pot)
         print("Total won =", won, "Total lost =", lost, "Total bet =", bet)
         plt.plot(x, y)
@@ -238,8 +312,9 @@ def SessionResults(t, pot, won, lost, bet, plot_title, x, y, print_results):
 
 
 
-won, lost, bet = crapsTestSim(10, 300, "Max", True, True)
+#won, lost, bet = crapsTestSim(10, 300, "Max", True, True)
 #won, lost, bet = PassWithOdds(100, 300, "Max", False, True)
+#won, lost, bet = Classic_Regression(100, 300, "Max", True, True)
 
-#WinFrequency()
+WinFrequency()
 #DiceFrequency(1000000)
