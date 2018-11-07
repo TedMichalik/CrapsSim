@@ -16,10 +16,10 @@ print("\n\nBuild Version:", str(build_version), "\nTime:", str(current_time), "\
 def WinFrequency():
     """Creates win amount frequency chart for Craps strategy"""
     numGames = 100 # Number of games in a session
-    pot = 100  # Starting amount to bet for each session
-    odds = "No" # Odds bet: Max, Min, or No
+    pot = 2000  # Starting amount to bet for each session
+    odds = "Min" # Odds bet: Max, Min, or No
     do = True  # True = bet "Do"/Pass/Come side; False = bet "Don't" Pass/Come side
-    sessions = 40000 # Number of 100 game sessions to run
+    sessions = 1000000 # Number of 100 game sessions to run
     x = [] # Net gain
     y = [] # Number of times that amount was won or lost
     TotalLost = 0
@@ -28,7 +28,7 @@ def WinFrequency():
     MaxWin = 0
 
     for s in range(sessions):
-        won, lost, bet = PassWithOdds(numGames, pot, odds, do, False) # Strategy to analyze goes here
+        won, lost, bet = MyStrategy(numGames, pot, odds, do, False) # Strategy to analyze goes here
         gain = won - lost
         if gain in x:
             i = x.index(gain)
@@ -56,7 +56,8 @@ def WinFrequency():
     plt.xlabel('Net Gain')
     plt.ylabel('No. of Sessions ({} Games per Session)'.format(numGames))
 #    plt.title('Net Gain Frequency - $5 Craps Table\nClassic Regression Strategy')
-    plt.title('Net Gain Frequency - $5 Craps Table\n{}Pass Line, {} Odds'.format(DoString,odds))
+#    plt.title('Net Gain Frequency - $5 Craps Table\n{}Pass Line, {} Odds'.format(DoString,odds))
+    plt.title('Net Gain Frequency - $5 Craps Table\n{}Pass Line, Min Odds using winnings'.format(DoString))
     plt.text(1, 1, "Avg Loss per Session={:.2f}\nHouse Edge={:.2%}\nSessions={:,}\nPot={}".format((TotalLost-TotalWon)/sessions, (TotalLost-TotalWon)/TotalBet, sessions, pot),
              horizontalalignment='right', verticalalignment='top', transform=ax.transAxes)
     plt.show()
@@ -368,7 +369,7 @@ def SessionResults(t, start, pot, won, lost, bet, plot_title, x, y, print_result
 #won, lost, bet = crapsTestSim(10, 300, "Max", True, True)
 #won, lost, bet = PassWithOdds(100, 300, "Max", False, True)
 #won, lost, bet = Classic_Regression(100, 300, "Max", True, True)
-won, lost, bet = MyStrategy(10, 300, "Min", False, True)
+#won, lost, bet = MyStrategy(100, 300, "Min", False, True)
 
-#WinFrequency()
+WinFrequency()
 #DiceFrequency(1000000)
