@@ -162,8 +162,8 @@ def PassWithOdds(numGames, pot, odds, do, print_status):
     if right_way:
         dodont = ""
     else:
-        dodont = "Don't"
-    plot_title = 'Craps Session History -{}Pass with {} odds'.format(dodont, odds)
+        dodont = "Don't "
+    plot_title = 'Craps Session History - {}Pass with {} odds'.format(dodont, odds)
     x = [] # Game number
     y = [] # Pot amount after each game
 
@@ -280,8 +280,8 @@ def MyStrategy(numGames, pot, odds, do, print_status):
     if right_way:
         dodont = ""
     else:
-        dodont = "Don't"
-    plot_title = 'Craps Session History -{}Pass with Min odds using winnings'.format(dodont)
+        dodont = "Don't "
+    plot_title = 'Craps Session History - {}Pass with Min odds using winnings'.format(dodont)
     x = [] # Game number
     y = [] # Pot amount after each game
 
@@ -367,9 +367,9 @@ def SessionResults(t, start, pot, won, lost, bet, plot_title, x, y, print_result
 
 
 #won, lost, bet = crapsTestSim(10, 300, "Max", True, True)
-#won, lost, bet = PassWithOdds(100, 300, "Max", False, True)
+#won, lost, bet = PassWithOdds(100, 100, "Min", False, True)
 #won, lost, bet = Classic_Regression(100, 300, "Max", True, True)
-#won, lost, bet = MyStrategy(100, 300, "Min", False, True)
+won, lost, bet = MyStrategy(100, 100, "Min", False, True)
 
-WinFrequency()
+#WinFrequency()
 #DiceFrequency(1000000)
